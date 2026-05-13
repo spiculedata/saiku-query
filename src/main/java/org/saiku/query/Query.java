@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 
 import mondrian.olap.Annotation;
-import mondrian.olap4j.MondrianOlap4jLevel;
 
 public class Query {
 
@@ -383,27 +382,6 @@ public class Query {
     	return calculatedMeasures.get(name);
     }
 
-    public QueryHierarchy createTimeLag(QueryHierarchy hierarchy, MondrianOlap4jLevel level, int amount) {
-
-
-      Map<String, Annotation> a = level.getAnnotations();
-      Annotation v;
-      if(a.containsKey("AnalyzerDateFormat")) {
-        v = a.get("AnalyzerDateFormat");
-
-
-        hierarchy.setMdxSetExpression("(CurrentDateMember(" + hierarchy.getUniqueName() + ", \"" +
-                                      hierarchy.getUniqueName() + "\\" +
-                                      "." + v.getValue() + "\").Lag(" + String.valueOf(amount) + ") : CurrentDateMember"
-                                      +
-                                      "(" + hierarchy.getUniqueName() + "," +
-                                      "\"" + hierarchy.getUniqueName() + "\\." + v.getValue() + "\"))");
-      }
-      else{
-        System.out.println("Can't do this");
-      }
-      return hierarchy;
-    }
 
 
   public Measure getMeasure(String name) {

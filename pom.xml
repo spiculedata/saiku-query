@@ -10,22 +10,10 @@
 	<name>query</name>
 	<url>http://maven.apache.org</url>
 
-	<distributionManagement>
-		<repository>
-			<id>deployment</id>
-			<name>Internal Releases</name>
-			<url>http://repo.meteorite.bi/content/repositories/alabs-release-local/</url>
-		</repository>
-		<snapshotRepository>
-			<id>deployment</id>
-			<name>Internal Snapshots</name>
-			<url>http://repo.meteorite.bi/content/repositories/alabs-snapshot-local/</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 	<build>
 		<plugins>
@@ -77,19 +65,30 @@
 	</build>
 	<repositories>
         <repository>
-            <id>pentaho-third-party</id>
-            <url>http://nexus.pentaho.org/content/repositories/proxied-3rd-party-releases/</url>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+        <!-- Spicule-published artifacts on GitHub Packages. Auth: matching
+             <server> entries in ~/.m2/settings.xml (one PAT with read:packages
+             covers all three). -->
+        <repository>
+            <id>github-mondrian-saiku</id>
+            <url>https://maven.pkg.github.com/spiculedata/mondrian-saiku</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
         </repository>
         <repository>
-            <id>pentaho-public-release</id>
-            <url>http://nexus.pentaho.org/content/repositories/pentaho-public-release-repos/</url>
+            <id>github-olap4j</id>
+            <url>https://maven.pkg.github.com/spiculedata/olap4j</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
         </repository>
 	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.olap4j</groupId>
 			<artifactId>olap4j</artifactId>
-			<version>1.2.0</version>
+			<version>1.2.0-spicule-1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>asm</groupId>
@@ -112,7 +111,7 @@
 		<dependency>
 			<groupId>pentaho</groupId>
 			<artifactId>mondrian</artifactId>
-			<version>3.9.0.2</version>
+			<version>4.8.1.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.servlet</groupId>
@@ -142,11 +141,6 @@
 			<artifactId>junit</artifactId>
 			<version>3.8.1</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.saiku</groupId>
-			<artifactId>saiku-query</artifactId>
-			<version>0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
