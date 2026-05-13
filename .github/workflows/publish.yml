@@ -31,14 +31,28 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-          server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
+
+      # saiku-query's pom resolves transitives from spiculedata/mondrian-saiku
+      # and spiculedata/olap4j, plus deploys to spiculedata/saiku-query —
+      # three distinct GH Packages URLs. Write the settings.xml directly so
+      # all three <server> ids share the auto-issued GITHUB_TOKEN.
+      - name: Configure Maven settings.xml
+        env:
+          GH_ACTOR: ${{ github.actor }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0">
+            <servers>
+              <server><id>github</id><username>${GH_ACTOR}</username><password>${GH_TOKEN}</password></server>
+              <server><id>github-mondrian-saiku</id><username>${GH_ACTOR}</username><password>${GH_TOKEN}</password></server>
+              <server><id>github-olap4j</id><username>${GH_ACTOR}</username><password>${GH_TOKEN}</password></server>
+            </servers>
+          </settings>
+          EOF
 
       - name: Deploy to GitHub Packages
-        env:
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # -Dmaven.test.skip=true (not just -DskipTests) avoids compiling
         # the test sources, which still reference an inlined Mondrian
         # internal class that was removed in mondrian-4.8.1.0.
