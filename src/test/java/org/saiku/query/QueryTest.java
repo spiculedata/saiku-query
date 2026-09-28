@@ -9,6 +9,7 @@ import org.saiku.query.mdx.NameFilter;
 import org.saiku.query.mdx.NameLikeFilter;
 import org.saiku.query.metadata.CalculatedMeasure;
 import org.saiku.query.metadata.CalculatedMember;
+import org.saiku.query.metadata.NamedSet;
 
 import org.olap4j.Axis;
 import org.olap4j.CellSet;
@@ -78,7 +79,68 @@ public class QueryTest extends TestCase {
 			fail();
 		}
 	}
-	
+
+	public void testNamedSet() {
+		try {
+			Cube cube = getFoodmartCube("Sales");
+			Query query = new Query("my query", cube);
+			QueryAxis qa = query.getAxis(Axis.COLUMNS);
+			QueryHierarchy products = query.getHierarchy("[Product]");
+			products.includeLevel("Product Family");
+			qa.addHierarchy(products);
+
+			NamedSet ns = new NamedSet(
+					"TopProducts",
+					"TopCount({[Product].[Product Family].Members}, 2, Measures.[Unit Sales])");
+			query.addNamedSet(ns);
+
+			assertEquals(1, query.getNamedSets().size());
+			assertSame(ns, query.getNamedSets().get("TopProducts"));
+
+			SelectNode mdx = query.getSelect();
+			String mdxString = mdx.toString();
+			if (TestContext.DEBUG) {
+				System.out.println(TestUtil.toJavaString(mdxString));
+			}
+			String expectedQuery =
+					"WITH\n"
+							+ "SET [TopProducts] AS\n"
+							+ "    TopCount({[Product].[Product Family].Members}, 2, Measures.[Unit Sales])\n"
+							+ "SET [~COLUMNS] AS\n"
+							+ "    {[Product].[Product Family].Members}\n"
+							+ "SELECT\n"
+							+ "[~COLUMNS] ON COLUMNS\n"
+							+ "FROM [Sales]";
+			TestUtil.assertEqualsVerbose(expectedQuery, mdxString);
+
+			// Adding a set under an existing name replaces it rather than
+			// producing a duplicate SET clause (which Mondrian would reject).
+			NamedSet replacement = new NamedSet(
+					"TopProducts",
+					"BottomCount({[Product].[Product Family].Members}, 2, Measures.[Unit Sales])");
+			query.addNamedSet(replacement);
+			assertEquals(1, query.getNamedSets().size());
+			assertSame(replacement, query.getNamedSets().get("TopProducts"));
+
+			query.removeNamedSet("TopProducts");
+			assertEquals(0, query.getNamedSets().size());
+
+			mdx = query.getSelect();
+			mdxString = mdx.toString();
+			expectedQuery =
+					"WITH\n"
+							+ "SET [~COLUMNS] AS\n"
+							+ "    {[Product].[Product Family].Members}\n"
+							+ "SELECT\n"
+							+ "[~COLUMNS] ON COLUMNS\n"
+							+ "FROM [Sales]";
+			TestUtil.assertEqualsVerbose(expectedQuery, mdxString);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
 	public void testTopPercentQuery() {
 		try {
 			Cube cube = getFoodmartCube("Sales");

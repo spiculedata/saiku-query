@@ -18,6 +18,7 @@ package org.saiku.query;
 import org.saiku.query.ISortableQuerySet.HierarchizeMode;
 import org.saiku.query.metadata.CalculatedMeasure;
 import org.saiku.query.metadata.CalculatedMember;
+import org.saiku.query.metadata.NamedSet;
 import org.saiku.query.util.QueryUtil;
 
 import org.apache.commons.lang.StringUtils;
@@ -52,7 +53,8 @@ public class Query {
         new HashMap<String, QueryHierarchy>();
     
     protected NamedList<CalculatedMeasure> calculatedMeasures = new NamedListImpl<CalculatedMeasure>();
-    
+    protected NamedList<NamedSet> namedSets = new NamedListImpl<NamedSet>();
+
     protected QueryDetails details;
     /**
      * Whether or not to select the default hierarchy and default
@@ -380,6 +382,39 @@ public class Query {
     
     public CalculatedMeasure getCalculatedMeasure(String name) {
     	return calculatedMeasures.get(name);
+    }
+
+    /**
+     * Adds a named set to this query, to be emitted as a
+     * {@code WITH SET [name] AS (expression)} clause ahead of the SELECT.
+     * If a named set with the same name is already present, it is replaced
+     * so the emitted MDX never carries a duplicate {@code SET} name.
+     * @param namedSet The named set to add.
+     */
+    public void addNamedSet(NamedSet namedSet) {
+    	removeNamedSet(namedSet.getName());
+    	namedSets.add(namedSet);
+    }
+
+    /**
+     * Removes the named set with the given name from this query, if present.
+     * @param name The name of the named set to remove.
+     */
+    public void removeNamedSet(String name) {
+    	if (name != null) {
+    		NamedSet existing = namedSets.get(name);
+    		if (existing != null) {
+    			namedSets.remove(existing);
+    		}
+    	}
+    }
+
+    /**
+     * Returns the named sets currently added to this query.
+     * @return A NamedList of the query's named sets.
+     */
+    public NamedList<NamedSet> getNamedSets() {
+    	return namedSets;
     }
 
 

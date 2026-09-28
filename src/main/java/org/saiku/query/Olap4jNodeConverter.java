@@ -47,6 +47,7 @@ import org.saiku.query.Query.BackendFlavor;
 import org.saiku.query.mdx.IFilterFunction;
 import org.saiku.query.metadata.CalculatedMeasure;
 import org.saiku.query.metadata.CalculatedMember;
+import org.saiku.query.metadata.NamedSet;
 
 /**
  * Utility class to convert a Query object to a SelectNode.
@@ -61,6 +62,11 @@ public class Olap4jNodeConverter extends NodeConverter {
 		for(CalculatedMember c: query.getCalculatedMembers()){
 			WithMemberNode wm = toOlap4jCalculatedMember(c);
 			withList.add(wm);
+		}
+
+		for (NamedSet ns : query.getNamedSets()) {
+			WithSetNode wsn = toOlap4jNamedSet(ns);
+			withList.add(wsn);
 		}
 
 		axisList.add(query.getAxes().get(Axis.COLUMNS));

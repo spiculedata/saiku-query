@@ -28,11 +28,13 @@ import org.olap4j.mdx.ParseTreeNode;
 import org.olap4j.mdx.PropertyValueNode;
 import org.olap4j.mdx.Syntax;
 import org.olap4j.mdx.WithMemberNode;
+import org.olap4j.mdx.WithSetNode;
 import org.olap4j.mdx.parser.MdxParser;
 import org.olap4j.mdx.parser.impl.DefaultMdxParserImpl;
 import org.olap4j.metadata.Measure;
 import org.olap4j.metadata.Member;
 import org.saiku.query.metadata.Calculated;
+import org.saiku.query.metadata.NamedSet;
 
 public class NodeConverter {
 	
@@ -158,6 +160,15 @@ public class NodeConverter {
 		return wm;
 	}
 	
+	protected static WithSetNode toOlap4jNamedSet(NamedSet namedSet) {
+		MdxParser parser = new DefaultMdxParserImpl();
+		ParseTreeNode expression = parser.parseExpression(namedSet.getExpression());
+		return new WithSetNode(
+				null,
+				IdentifierNode.ofNames(namedSet.getName()),
+				expression);
+	}
+
 	protected static IdentifierNode getIdentifier(String... identifiers) {
 		String identifier = "";
 		for (int i = 0; i < identifiers.length; i ++) {
